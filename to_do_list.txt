@@ -1,0 +1,59 @@
+- recopier ce que fait la pipe |
+- file cmd | file cmd
+- bonus : faire un nombre illimite de pipes et pas que 1
+- gerer "ET" quand le premier parametre est "here_doc"
+-verifier infile outfile
+- parse l'environnement 
+
+la fonction fork :
+- unistd.h
+- un processeur enfant est creer et est execute en meme temps que le main process
+- retourne un entier
+- execute un programme deux fois a partir de la fonction fork
+- l'id retourne est toujours 0 sauf si erreur -1
+- si on appelle fork une seconde fois, le main a un nouveau processeur enfant
+et l'enfant 1 a un enfant 2
+- il faut creer un processus enfant seulement vi un processus parent de base
+mieux et plus safe
+
+main process id1 = x | id2 = y -> child process id1 = x | id2 = 0
+|
+child process id1 = 0 | id2 = z -> child process id1 = 0 | id2= 0
+
+la fonction wait:
+- utilisee avec fork
+- permet d'attendre la fin de l'exec d'un processeur enfant avant le main
+-wait(NULL) retourne -1 s'il n'y a rien a attendre
+
+
+
+fflush(stdout) -> des qu'on print qqch c'est affiche sur le terminal
+
+dup et dup2 :
+
+utiliser les pipes :
+- sert a envoyer des infos d'un processus a un autre
+- la fonction pipe utilise 2 files descriptor qui sont ce qu'on veut lire et ecrire
+- retourne -1 si ca ne fonctionne pas
+- il faut dans un premier temps ouvrir la pipe puis utiliser fork pour que les fd de la pipe
+soient dans les deux processeurs -> ils sont herites
+- si on ferme un fd dans un process il peut toujours etre ouvert dans un autre
+- la pipe doit toujours avoir 2 fd : on lit d'un fd[0] et on ecrit dans l'autre fd[1]
+- il faut fermer les deux fd a chaque fois dans chaque processeurs car les deux sont ouverts
+dans chaque processeur
+- on ferme en premier lieux celui dont on a pas besoin (read ou write)
+- les deux processeurs sont lies, le reading fd est le writing fd de l'autre
+- on peut utiliser write et read dans le meme processeur
+- on prend l'info avec read et on la renvoie avec write
+-> si je veux communiquer entre deux pipes :
+main pipe write[1] -> child pipe read[0] -> child pipe write[1] -> main pipe read[0]
+il faut donc deux pipe pour communiquer, une C -> P et une P-> C
+sinon avec une seule pipe le processeur parent peut lire avant l'enfant par exemple
+-on read avec 0 et on write avec 1
+
+executing commands in C :
+- execve utilise 3 arguent
+on prend le chemin d'acces vers la commandes
+args [] = {path, option, environnent (NULL)}
+envp [] = NULL
+execve("path", args, envp);
