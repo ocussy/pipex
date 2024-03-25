@@ -57,3 +57,9 @@ on prend le chemin d'acces vers la commandes
 args [] = {path, option, environnent (NULL)}
 envp [] = NULL
 execve("path", args, envp);
+
+-> apprendre dup et dup2
+-> comprendre les FILE IN FILE OUT
+-> faire le principe ou on creer plusieurs enfant pour chaque commandes
+-> creer une structure avec dedans : toutes les commandes, file 1 et file 2
+

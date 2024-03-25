@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/03/18 18:58:15 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/03/25 16:41:06 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ char	*ft_find_word(char *argv)
 	return (word);
 }
 
-char	**ft_modify_tab(char **tab, char *argv)
+char	**ft_modify_tab(t_info *src)
 {
 	char	**new_tab;
 	int		i;
@@ -73,83 +73,215 @@ char	**ft_modify_tab(char **tab, char *argv)
 	int		size_word;
 
 	i = 0;
-	word = ft_find_word(argv);
-	printf("Le mot est %s\n", word);
+	word = ft_find_word(src->cmd[src->index]);
 	size_word = (int)ft_strlen(word);
-	new_tab = (char **)malloc(sizeof(char *) * (ft_size_tab(tab) + 1));
+	new_tab = (char **)malloc(sizeof(char *) * (ft_size_tab(src->all_path)
+				+ 1));
 	if (new_tab == NULL)
 		ft_exit();
-	while (tab[i] != NULL)
+	while (src->all_path[i] != NULL)
 	{
-		new_tab[i] = (char *)malloc(ft_strlen(tab[i] + size_word + 1));
+		new_tab[i] = (char *)malloc(ft_strlen(src->all_path[i] + size_word
+					+ 1));
 		if (new_tab[i] == NULL)
 			ft_exit();
-		ft_strlcpy(new_tab[i], tab[i])
+		ft_strlcpy(new_tab[i], src->all_path[i], ft_strlen(src->all_path[i])
+			+ 1);
+		ft_strlcat(new_tab[i], "/", ft_strlen(src->all_path[i]) + 2);
+		ft_strlcat(new_tab[i], word, ft_strlen(new_tab[i]) + size_word + 1);
+		i++;
 	}
-	return (tab);
+	new_tab[i] = NULL;
+	return (new_tab);
 }
 
-char	*ft_find_path(char **argv, char **env)
+char	*ft_find_good_path(t_info *src)
 {
 	int		i;
 	char	*str;
-	char	**tab;
 
-	i = ft_env_location(env);
+	i = ft_env_location(src->env);
 	if (i == -1)
 		ft_exit();
-	str = env[i] + 5;
-	tab = ft_split(str, ':');
-	tab = ft_modify_tab(tab, argv[2]);
-	// i = 0;
-	// while (tab[i] != NULL)
-	// {
-	// 	ft_strlcat(tab[i], "/", sizeof(tab[i]));
-	// 	printf("La case %d du tableau est : %s\n", i, tab[i]);
-	// 	i++;
-	// }
-	return (0);
+	str = src->env[i] + 5;
+	src->all_path = ft_split(str, ':');
+	if (src->all_path == NULL)
+		ft_exit();
+	src->all_path = ft_modify_tab(src);
+	i = 0;
+	while (src->all_path[i])
+	{
+		if (access(src->all_path[i], F_OK) != -1 && access(src->all_path[i],
+				R_OK) != -1)
+		{
+			printf("Le path %s est valide !\n", src->all_path[i]);
+			return (src->all_path[i]);
+		}
+		i++;
+	}
+	return (NULL);
 }
 
-int	ft_verif(int argc, char **argv, char **env)
+void	ft_tab_cmd(t_info *src)
 {
-	int		file1;
-	int		fd[2];
-	int		id;
-	char	*path;
+	int	i;
+	int	j;
 
-	path = NULL;
-	// printf("Il y a %d arguments dont %s\n", argc, argv[1]);
-	file1 = open(argv[1], O_RDONLY);
-	if (file1 == -1)
+	i = 0;
+	j = 2;
+	src->cmd = (char **)malloc(sizeof(char *) * src->nb_cmd + 1);
+	if (src->cmd == NULL)
 		ft_exit();
-	if (pipe(fd) == -1)
-		ft_exit();
-	id = fork();
-	if (id == -1)
-		ft_exit();
-	if (id == 0)
+	while (i < src->nb_cmd)
 	{
-		path = ft_find_path(argv, env);
-		// if (path == NULL)
-		// 	ft_exit();
-		// trouver le path dans ENV
-		// split le path
-		// rajouter les /
-		// rajouter la commande a la fin
-		// chercher avec access dans chaque path
+		src->cmd[i] = ft_strdup(src->argv[j]);
+		if (src->cmd[i] == NULL)
+			ft_exit();
+		i++;
+		j++;
 	}
-	if (id != 0)
-		wait(0);
-	printf("Le fichier %d a pu s'ouvrir", argc);
-	close(file1);
-	return (0);
+	src->cmd[i] = NULL;
+}
+
+void	ft_callexecve(t_info *src)
+{
+	execve(src->good_path, src->command_split, src->env);
+	perror("execve");
+	ft_exit();
+}
+
+void	ft_first_child(t_info *src, int i)
+{
+	printf("Je suis le premier processus enfant\n");
+	close(src->fd[READ_FD]);
+	src->good_path = ft_find_good_path(src);
+	printf("Le bon path est %s\n", src->good_path);
+	if (src->good_path == NULL)
+		ft_exit();
+	src->command_split = ft_split(src->cmd[i], ' ');
+	dup2(src->fd[WRITE_FD], STDOUT_FILENO);
+	dup2(src->open_file, STDIN_FILENO);
+	close(src->open_file);
+	close(src->fd[WRITE_FD]);
+	ft_callexecve(src);
+}
+
+void	ft_middle_child(t_info *src, int i)
+{
+	src->good_path = ft_find_good_path(src);
+	if (src->good_path == NULL)
+		ft_exit();
+	src->command_split = ft_split(src->cmd[i], ' ');
+	dup2(src->fd[READ_FD], STDIN_FILENO);
+	dup2(src->fd[WRITE_FD], STDOUT_FILENO);
+	close(src->fd[READ_FD]);
+	close(src->fd[WRITE_FD]);
+	ft_callexecve(src);
+}
+
+void	ft_last_child(t_info *src, int i)
+{
+	int	fd_file;
+
+	close(src->fd[WRITE_FD]);
+	src->good_path = ft_find_good_path(src);
+	if (src->good_path == NULL)
+		ft_exit();
+	src->command_split = ft_split(src->cmd[i], ' ');
+	fd_file = open(src->outfile, O_WRONLY | O_TRUNC | O_CREAT, 0666);
+	if (fd_file == -1)
+		ft_exit();
+	dup2(fd_file, STDOUT_FILENO);
+	dup2(src->fd[READ_FD], STDIN_FILENO);
+	close(src->fd[READ_FD]);
+	close(fd_file);
+	ft_callexecve(src);
+}
+
+void	ft_wait_parent(void)
+{
+	while (errno != ECHILD)
+		wait(NULL);
+}
+
+void	ft_parent_process(t_info src)
+{
+	close(src->fd[WRITE_FD]);
+	dup
+}
+
+void	ft_pipex(t_info *src)
+{
+	int	i;
+
+	i = 0;
+	src->open_file = open(src->infile, O_RDONLY);
+	if (src->open_file == -1 || pipe(src->fd) == -1)
+		ft_exit();
+	ft_tab_cmd(src);
+	i = 0;
+	while (i < src->nb_cmd)
+	{
+		src->pid = fork();
+		if (src->pid == -1)
+			ft_exit();
+		else if (src->pid == 0)
+		{
+			if (i == 0)
+				ft_first_child(src, i);
+			else if (i == (src->nb_cmd - 1))
+				ft_last_child(src, i);
+			else
+				ft_middle_child(src, i);
+			exit(EXIT_SUCCESS);
+		}
+		i++;
+		src->index++;
+		ft_parent_process(src);
+	}
+	ft_wait_parent();
+}
+
+void	ft_init_src(t_info *src)
+{
+	src->nb_cmd = 0;
+	src->index = 0;
+	src->pid = -1;
+	src->open_file = -1;
+	src->all_path = NULL;
+	src->env = NULL;
+	src->cmd = NULL;
+	src->infile = NULL;
+	src->outfile = NULL;
+	src->argv = NULL;
+	src->command_split = NULL;
+}
+
+void	ft_make_struct(int argc, char **argv, char **env, t_info *src)
+{
+	int	i;
+	int	j;
+
+	i = 2;
+	j = 0;
+	ft_init_src(src);
+	src->index = 0;
+	src->nb_cmd = argc - 3;
+	src->infile = argv[1];
+	src->outfile = argv[argc - 1];
+	src->env = env;
+	src->argv = argv;
 }
 
 int	main(int argc, char **argv, char **env)
 {
+	t_info	src;
+
 	if (argc > 4)
-		ft_verif(argc, argv, env);
+	{
+		ft_make_struct(argc, argv, env, &src);
+		ft_pipex(&src);
+	}
 	else
 	{
 		ft_exit();

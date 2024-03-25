@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 15:25:36 by ocussy            #+#    #+#             */
-/*   Updated: 2024/03/18 18:16:39 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/03/25 16:17:22 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,29 @@
 # include <stdlib.h>
 # include <sys/stat.h>
 # include <sys/types.h>
-# include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
+#include <errno.h>
+
+# define READ_FD 0
+# define WRITE_FD 1
+
+typedef struct s_info
+{
+	int		nb_cmd;
+	int		index;
+	char	**argv;
+	char	**cmd;
+	char	**all_path;
+	char	*good_path;
+	char	*infile;
+	char	*outfile;
+	char	**env;
+	char	**command_split;
+	int		pid;
+	int		open_file;
+	int fd[2];
+
+}			t_info;
 
 #endif
