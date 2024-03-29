@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 15:25:36 by ocussy            #+#    #+#             */
-/*   Updated: 2024/03/25 16:17:22 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/03/28 11:04:42 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <sys/wait.h>
 # include <unistd.h>
 #include <errno.h>
+#include "./ft_printf/ft_printf.h"
 
 # define READ_FD 0
 # define WRITE_FD 1

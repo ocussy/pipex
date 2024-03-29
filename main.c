@@ -6,16 +6,21 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/03/25 16:41:06 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/03/28 11:35:19 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	ft_exit(void)
+void	ft_exit(int i)
 {
-	perror("Une erreur s'est produite\n");
-	exit(1);
+	if (i == 1)
+		ft_printf("Too few arguments.\n");
+	if (i == 2)
+		ft_printf("Error :%s\n", strerror(errno));
+	if (i == 3)
+		
+	exit(0);
 }
 
 int	ft_env_location(char **env)
@@ -131,12 +136,12 @@ void	ft_tab_cmd(t_info *src)
 	j = 2;
 	src->cmd = (char **)malloc(sizeof(char *) * src->nb_cmd + 1);
 	if (src->cmd == NULL)
-		ft_exit();
+		ft_exit(2);
 	while (i < src->nb_cmd)
 	{
 		src->cmd[i] = ft_strdup(src->argv[j]);
 		if (src->cmd[i] == NULL)
-			ft_exit();
+			ft_exit(3);
 		i++;
 		j++;
 	}
@@ -204,10 +209,11 @@ void	ft_wait_parent(void)
 		wait(NULL);
 }
 
-void	ft_parent_process(t_info src)
+void	ft_parent_process(t_info *src)
 {
 	close(src->fd[WRITE_FD]);
-	dup
+	dup2(src->fd[READ_FD], STDOUT_FILENO);
+	close(src->fd[READ_FD]);
 }
 
 void	ft_pipex(t_info *src)
@@ -216,15 +222,17 @@ void	ft_pipex(t_info *src)
 
 	i = 0;
 	src->open_file = open(src->infile, O_RDONLY);
-	if (src->open_file == -1 || pipe(src->fd) == -1)
-		ft_exit();
+	if (src->open_file == -1)
+		ft_exit(2);
 	ft_tab_cmd(src);
 	i = 0;
 	while (i < src->nb_cmd)
 	{
+		if (pipe(src->fd) == -1)
+			ft_exit(2);
 		src->pid = fork();
 		if (src->pid == -1)
-			ft_exit();
+			ft_exit(2);
 		else if (src->pid == 0)
 		{
 			if (i == 0)
@@ -237,7 +245,6 @@ void	ft_pipex(t_info *src)
 		}
 		i++;
 		src->index++;
-		ft_parent_process(src);
 	}
 	ft_wait_parent();
 }
@@ -284,7 +291,7 @@ int	main(int argc, char **argv, char **env)
 	}
 	else
 	{
-		ft_exit();
+		ft_exit(1);
 	}
 	return (0);
 }
