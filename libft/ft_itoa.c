@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/11 11:31:07 by ocussy            #+#    #+#             */
-/*   Updated: 2023/11/11 11:31:08 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/01 16:29:23 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	ft_len(int nb)
 	return (len);
 }
 
-char	*ft_putstr(int nb, int len, char *str)
+char	*ft_putstr_itoa(int nb, int len, char *str)
 {
 	int	i;
 
@@ -69,7 +69,7 @@ char	*ft_itoa(int n)
 	if (!str)
 		return (0);
 	nb = n;
-	str = ft_putstr(nb, len, str);
+	str = ft_putstr_itoa(nb, len, str);
 	str[len] = '\0';
 	return (str);
 }

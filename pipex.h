@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 15:25:36 by ocussy            #+#    #+#             */
-/*   Updated: 2024/03/28 11:04:42 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/10 10:05:13 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define PIPEX_H
 
 # include "./libft/libft.h"
+# include <errno.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -21,8 +22,6 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
-#include <errno.h>
-#include "./ft_printf/ft_printf.h"
 
 # define READ_FD 0
 # define WRITE_FD 1
@@ -34,6 +33,7 @@ typedef struct s_info
 	char	**argv;
 	char	**cmd;
 	char	**all_path;
+	char	**all_path_modify;
 	char	*good_path;
 	char	*infile;
 	char	*outfile;
@@ -41,7 +41,9 @@ typedef struct s_info
 	char	**command_split;
 	int		pid;
 	int		open_file;
-	int fd[2];
+	int		fd[2];
+	int		is_heredoc;
+	char *limiter;
 
 }			t_info;
 

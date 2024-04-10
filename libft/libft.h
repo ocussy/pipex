@@ -6,13 +6,15 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/14 09:12:26 by ocussy            #+#    #+#             */
-/*   Updated: 2023/11/15 11:34:24 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/09 18:27:05 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
 
+# include "ft_printf.h"
+# include "get_next_line.h"
 # include <stddef.h>
 # include <stdlib.h>
 # include <string.h>

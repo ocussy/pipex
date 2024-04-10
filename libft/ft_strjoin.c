@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/11 11:35:29 by ocussy            #+#    #+#             */
-/*   Updated: 2024/02/26 11:42:00 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/10 10:48:43 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ static char	*ft_join(char const *s1, char const *s2, char *str)
 		i++;
 	}
 	str[j] = '\0';
-	free((char *)s1);
 	return (str);
 }
 

@@ -33,6 +33,16 @@ SRC_FILES = ft_atoi.c \
 	    	ft_substr.c \
 		ft_tolower.c \
 	    	ft_toupper.c \
+			ft_printf.c \
+			ft_putchar.c \
+			ft_choose_print.c \
+			ft_putnbr_base.c \
+			ft_putnbr_ptr.c \
+			ft_putstr.c \
+			ft_putnbr_base_ptr.c \
+			ft_strlen_printf.c \
+			get_next_line.c \
+			get_next_line_utils.c \
 
 SRC_BONUS = ft_lstnew.c \
 			ft_lstadd_front.c \
@@ -48,7 +58,7 @@ OBJECTS = $(patsubst %.c, %.o, $(SRC_FILES))
 OBJECTS_BONUS = $(patsubst %.c, %.o, $(SRC_BONUS))
 INCLUDE = libft.h
 CC = cc
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -g3
 
 all: $(NAME)
 
