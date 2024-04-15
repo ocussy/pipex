@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/10 11:54:39 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/15 19:15:03 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,9 @@ void	ft_free_tab(char **tab)
 	int	i;
 
 	i = 0;
-	while (tab[i])
+	if (!tab)
+		return ;
+	while (tab[i] != NULL)
 	{
 		if (tab[i] != NULL)
 			free(tab[i]);
@@ -81,7 +83,6 @@ char	*ft_find_word(t_info *src, char *argv)
 	i = 0;
 	j = 0;
 	word_split = ft_split(argv, ' ');
-	printf("%s\n", word_split[0]);
 	if (word_split == NULL || word_split[0] == NULL)
 	{
 		if (word_split != NULL)
@@ -101,7 +102,6 @@ char	**ft_modify_tab(t_info *src)
 	int		size_word;
 
 	i = 0;
-	printf("index = %d\n", src->index);
 	word = ft_find_word(src, src->cmd[src->index]);
 	if (word == NULL)
 		ft_exit(src, 2);
@@ -162,8 +162,11 @@ void	ft_tab_cmd(t_info *src)
 	int	i;
 	int	j;
 
+	if (src->is_heredoc == 1)
+		j = 3;
+	else
+		j = 2;
 	i = 0;
-	j = 2;
 	src->cmd = (char **)malloc(sizeof(char *) * (src->nb_cmd + 1));
 	if (src->cmd == NULL)
 		ft_exit(src, 2);
@@ -289,15 +292,10 @@ void	ft_parent_process(t_info *src)
 	src->open_file = src->fd[READ_FD];
 }
 
-void	ft_pipex(t_info *src)
+void	ft_child(t_info *src)
 {
 	int	i;
 
-	src->open_file = open(src->infile, O_RDONLY);
-	printf("%s\n", src->infile);
-	if (src->open_file == -1)
-		ft_exit(src, 2);
-	ft_tab_cmd(src);
 	i = 0;
 	while (i < src->nb_cmd)
 	{
@@ -320,6 +318,48 @@ void	ft_pipex(t_info *src)
 		src->index++;
 		ft_parent_process(src);
 	}
+}
+
+void	ft_child_heredoc(t_info *src)
+{
+	int	i;
+
+	i = 0;
+	while (i < src->nb_cmd)
+	{
+		if (pipe(src->fd) == -1)
+			ft_exit(src, 2);
+		src->pid = fork();
+		if (src->pid == -1)
+			ft_exit(src, 2);
+		else if (src->pid == 0)
+		{
+			if (i == 1)
+				ft_first_child(src, i);
+			else if (i == (src->nb_cmd))
+				ft_last_child(src, i);
+			else
+				ft_middle_child(src, i);
+			exit(EXIT_SUCCESS);
+		}
+		i++;
+		src->index++;
+		ft_parent_process(src);
+	}
+}
+
+void	ft_pipex(t_info *src)
+{
+	int	i;
+
+	i = 0;
+	src->open_file = open(src->infile, O_RDONLY);
+	if (src->open_file == -1)
+		ft_exit(src, 2);
+	ft_tab_cmd(src);
+	ft_child(src);
+	// else if (src->is_heredoc == 1)
+	// 	ft_child_heredoc(src);
 	ft_free_tab(src->cmd);
 	ft_wait_parent();
 }
@@ -330,27 +370,33 @@ void	ft_init_file(t_info *src)
 	char	*line;
 	char	*buffer;
 	int		i;
+	char	*temp;
 
 	i = 0;
-	line = NULL;
+	line = ft_strdup("");
 	file = open("heredoc.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
 	// unlink(".heredoc.txt");
 	if (file == -1)
 		ft_exit(src, 2);
-	buffer = get_next_line(0);
+	buffer = get_next_line(READ_FD);
 	while (ft_strncmp(buffer, src->limiter, (ft_strlen(src->limiter) + 1)) != 0)
 	{
 		if (i == 0)
+		{
 			line = buffer;
+			free(buffer);
+		}
 		else
 		{
-			line = ft_strjoin(line, buffer);
+			temp = ft_strjoin(line, buffer);
+			line = temp;
 			free(buffer);
 		}
 		buffer = get_next_line(0);
 		++i;
 	}
 	write(file, line, ft_strlen(line));
+	free(line);
 	close(file);
 }
 
@@ -378,19 +424,21 @@ void	ft_make_struct(int argc, char **argv, char **env, t_info *src)
 	src->outfile = argv[argc - 1];
 	src->env = env;
 	src->argv = argv;
+	src->is_heredoc = 0;
 }
 
 void	ft_make_struct_heredoc(int argc, char **argv, char **env, t_info *src)
 {
 	ft_init_src(src);
 	src->nb_cmd = argc - 4;
-	src->index = 1;
+	// src->index = 1;
 	src->outfile = argv[argc - 1];
 	src->env = env;
 	src->argv = argv;
 	src->limiter = ft_strjoin(argv[2], "\n");
 	ft_init_file(src);
 	src->infile = "heredoc.txt";
+	src->is_heredoc = 1;
 }
 
 int	main(int argc, char **argv, char **env)
