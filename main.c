@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/15 19:15:03 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/16 18:37:37 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,14 @@ void	ft_free_tab(char **tab)
 	while (tab[i] != NULL)
 	{
 		if (tab[i] != NULL)
+		{
 			free(tab[i]);
+			tab[i] = NULL;
+		}
 		i++;
 	}
 	free(tab);
+	tab = NULL;
 }
 
 void	ft_exit(t_info *src, int i)
@@ -170,7 +174,7 @@ void	ft_tab_cmd(t_info *src)
 	src->cmd = (char **)malloc(sizeof(char *) * (src->nb_cmd + 1));
 	if (src->cmd == NULL)
 		ft_exit(src, 2);
-	while (i < src->nb_cmd)
+	while (i < src->nb_cmd && src->argv[j])
 	{
 		src->cmd[i] = ft_strdup(src->argv[j]);
 		if (src->cmd[i] == NULL)
@@ -207,7 +211,7 @@ char	*ft_clean_cmd(char *cmd)
 		i--;
 		j++;
 	}
-	while ((int)ft_strlen(cmd) != j)
+	while (*cmd && (int)ft_strlen(cmd) != j)
 		cmd++;
 	cmd++;
 	return (cmd);
@@ -222,6 +226,9 @@ void	ft_callexecve(t_info *src)
 
 void	ft_first_child(t_info *src, int i)
 {
+	src->open_file = open(src->infile, O_RDONLY);
+	if (src->open_file == -1)
+		ft_exit(src, 2);
 	close(src->fd[READ_FD]);
 	src->good_path = ft_find_good_path(src);
 	src->command_split = ft_split(src->cmd[i], ' ');
@@ -229,7 +236,6 @@ void	ft_first_child(t_info *src, int i)
 	{
 		src->good_path = ft_command_path(src, i);
 		ft_free_tab(src->command_split);
-		src->cmd[i] = ft_clean_cmd(src->cmd[i]);
 		src->command_split = ft_split(src->cmd[i], ' ');
 	}
 	if (src->good_path == NULL)
@@ -243,16 +249,14 @@ void	ft_first_child(t_info *src, int i)
 
 void	ft_middle_child(t_info *src, int i)
 {
-	close(src->fd[READ_FD]);
 	src->good_path = ft_find_good_path(src);
 	if (src->good_path == NULL)
 		src->good_path = ft_command_path(src, i);
 	if (src->good_path == NULL)
 		ft_exit(src, 3);
 	src->command_split = ft_split(src->cmd[i], ' ');
-	dup2(src->open_file, STDIN_FILENO);
 	dup2(src->fd[WRITE_FD], STDOUT_FILENO);
-	close(src->open_file);
+	close(src->fd[READ_FD]);
 	close(src->fd[WRITE_FD]);
 	ft_callexecve(src);
 }
@@ -261,7 +265,6 @@ void	ft_last_child(t_info *src, int i)
 {
 	int	fd_file;
 
-	close(src->fd[READ_FD]);
 	close(src->fd[WRITE_FD]);
 	src->good_path = ft_find_good_path(src);
 	if (src->good_path == NULL)
@@ -273,23 +276,21 @@ void	ft_last_child(t_info *src, int i)
 	if (fd_file == -1)
 		ft_exit(src, 2);
 	dup2(fd_file, STDOUT_FILENO);
-	dup2(src->open_file, STDIN_FILENO);
-	close(src->open_file);
 	close(fd_file);
+	close(src->fd[READ_FD]);
 	ft_callexecve(src);
 }
 
-void	ft_wait_parent(void)
+void	ft_wait_parent(t_info *src)
 {
-	while (errno != ECHILD)
-		wait(NULL);
+	waitpid(src->pid, NULL, 0);
 }
 
 void	ft_parent_process(t_info *src)
 {
 	close(src->fd[WRITE_FD]);
-	close(src->open_file);
-	src->open_file = src->fd[READ_FD];
+	dup2(src->fd[READ_FD], STDIN_FILENO);
+	close(src->fd[READ_FD]);
 }
 
 void	ft_child(t_info *src)
@@ -303,6 +304,7 @@ void	ft_child(t_info *src)
 			ft_exit(src, 2);
 		src->pid = fork();
 		if (src->pid == -1)
+			// close les deux fd dans ft_exit
 			ft_exit(src, 2);
 		else if (src->pid == 0)
 		{
@@ -318,6 +320,7 @@ void	ft_child(t_info *src)
 		src->index++;
 		ft_parent_process(src);
 	}
+	ft_wait_parent(src);
 }
 
 void	ft_child_heredoc(t_info *src)
@@ -353,15 +356,11 @@ void	ft_pipex(t_info *src)
 	int	i;
 
 	i = 0;
-	src->open_file = open(src->infile, O_RDONLY);
-	if (src->open_file == -1)
-		ft_exit(src, 2);
 	ft_tab_cmd(src);
 	ft_child(src);
 	// else if (src->is_heredoc == 1)
 	// 	ft_child_heredoc(src);
 	ft_free_tab(src->cmd);
-	ft_wait_parent();
 }
 
 void	ft_init_file(t_info *src)
@@ -373,7 +372,7 @@ void	ft_init_file(t_info *src)
 	char	*temp;
 
 	i = 0;
-	line = ft_strdup("");
+	temp = NULL;
 	file = open("heredoc.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
 	// unlink(".heredoc.txt");
 	if (file == -1)
@@ -384,17 +383,19 @@ void	ft_init_file(t_info *src)
 		if (i == 0)
 		{
 			line = buffer;
-			free(buffer);
 		}
 		else
 		{
 			temp = ft_strjoin(line, buffer);
+			free(line);
 			line = temp;
 			free(buffer);
 		}
-		buffer = get_next_line(0);
+		buffer = get_next_line(READ_FD);
 		++i;
 	}
+	free(buffer);
+	// free(temp);
 	write(file, line, ft_strlen(line));
 	free(line);
 	close(file);
