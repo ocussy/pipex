@@ -1,3 +1,0 @@
-dans ton enfant tu prend en infile ton fichier
-dans ton mid tu prend le pipe stdin
-dans ton las tu prends le outfile en stdout
