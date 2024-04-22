@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 15:25:36 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/22 14:11:42 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 16:24:09 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ typedef struct s_info
 	int		fd[2];
 	int		is_heredoc;
 	char	*limiter;
+	int		i;
 
 }			t_info;
 
@@ -99,6 +100,8 @@ int			main(int argc, char **argv, char **env);
 
 // UTILS_BONUS
 
+void		ft_exit_sig(char *line, t_info *src, int i);
+char		*ft_while_gnl(char *temp, char *line, char *buffer);
 void		ft_make_gnl(char *temp, char *line, t_info *src, int file);
 void		ft_init_file(t_info *src);
 void		ft_make_struct_heredoc(int argc, char **argv, char **env,

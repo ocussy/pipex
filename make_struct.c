@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 16:18:31 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/22 14:09:22 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 16:42:09 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ void	ft_init_src(t_info *src)
 	src->argv = NULL;
 	src->command_split = NULL;
 	src->all_path_modify = NULL;
+	src->good_path = NULL;
 }
 
 void	ft_make_struct(int argc, char **argv, char **env, t_info *src)

@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 15:59:56 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/22 13:53:40 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 16:40:04 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	ft_exit(t_info *src, int i)
 		ft_printf("No path found or wrong command\n");
 	if (i == 4)
 		ft_printf("Wrong command\n");
+	if (i == 5)
+		ft_printf("Problem leaving here_doc\n");
 	if (src->command_split != NULL)
 		ft_free_tab(src->command_split);
 	if (src->cmd != NULL)
@@ -30,6 +32,10 @@ void	ft_exit(t_info *src, int i)
 		ft_free_tab(src->all_path);
 	if (src->all_path_modify)
 		ft_free_tab(src->all_path_modify);
+	if (src->good_path)
+		free(src->good_path);
+	if (src->is_heredoc == 1)
+		unlink("heredoc.txt");
 	exit(1);
 }
 
