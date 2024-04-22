@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 15:25:36 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/19 16:43:38 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 14:11:42 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ void		ft_wait_parent(t_info *src);
 
 void		ft_init_src(t_info *src);
 void		ft_make_struct(int argc, char **argv, char **env, t_info *src);
+void		ft_make_struct_bonus(int argc, char **argv, char **env,
+				t_info *src);
 
 // PIPEX_MANDATORY
 

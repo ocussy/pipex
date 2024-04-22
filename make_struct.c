@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 16:18:31 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/19 16:44:57 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 14:09:22 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,17 @@ void	ft_make_struct(int argc, char **argv, char **env, t_info *src)
 {
 	ft_init_src(src);
 	src->nb_cmd = 2;
+	src->infile = argv[1];
+	src->is_heredoc = 0;
+	src->outfile = argv[argc - 1];
+	src->env = env;
+	src->argv = argv;
+}
+
+void	ft_make_struct_bonus(int argc, char **argv, char **env, t_info *src)
+{
+	ft_init_src(src);
+	src->nb_cmd = argc - 3;
 	src->infile = argv[1];
 	src->is_heredoc = 0;
 	src->outfile = argv[argc - 1];

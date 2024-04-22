@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 15:59:56 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/19 16:49:58 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 13:53:40 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	ft_exit(t_info *src, int i)
 	if (i == 2)
 		ft_printf("Error :%s\n", strerror(errno));
 	if (i == 3)
-		ft_printf("No path found \n");
+		ft_printf("No path found or wrong command\n");
 	if (i == 4)
 		ft_printf("Wrong command\n");
 	if (src->command_split != NULL)

@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 11:48:14 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/19 16:43:34 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/22 14:08:50 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	main(int argc, char **argv, char **env)
 	if (ft_strncmp(argv[1], "here_doc", ft_strlen(argv[1])) == 0)
 		ft_make_struct_heredoc(argc, argv, env, &src);
 	else
-		ft_make_struct(argc, argv, env, &src);
+		ft_make_struct_bonus(argc, argv, env, &src);
 	if (argc > 4 && src.is_heredoc == 0)
 		ft_pipex(&src);
 	else if (argc > 5 && src.is_heredoc == 1)
