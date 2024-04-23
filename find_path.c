@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/19 11:50:32 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/19 16:28:22 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/23 17:01:39 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ char	*ft_command_path(t_info *src, int i)
 
 	command_path = NULL;
 	command_split = ft_split(src->cmd[i], ' ');
-	if (access(command_split[0], F_OK) != -1 && access(command_split[0],
-			R_OK) != -1)
+	if (access(command_split[0], F_OK | X_OK | R_OK) != -1)
 		command_path = ft_strdup(command_split[0]);
 	ft_free_tab(command_split);
 	return (command_path);
@@ -88,8 +87,7 @@ char	*ft_find_good_path(t_info *src)
 	i = 0;
 	while (src->all_path[i])
 	{
-		if (access(src->all_path_modify[i], F_OK) != -1
-			&& access(src->all_path_modify[i], R_OK) != -1)
+		if (access(src->all_path_modify[i], F_OK | R_OK | X_OK) != -1)
 			good_path = ft_strdup(src->all_path_modify[i]);
 		i++;
 	}

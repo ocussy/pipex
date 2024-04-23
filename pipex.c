@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/22 16:35:12 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/23 17:50:02 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void	ft_first_child(t_info *src, int i)
 {
+	close(src->fd[READ_FD]);
 	src->open_file = open(src->infile, O_RDONLY);
 	if (src->is_heredoc == 1)
 		unlink("heredoc.txt");
@@ -42,6 +43,7 @@ void	ft_last_child(t_info *src, int i)
 	int	fd_file;
 
 	close(src->fd[WRITE_FD]);
+	close(src->fd[READ_FD]);
 	src->good_path = ft_find_good_path(src);
 	if (src->good_path == NULL)
 		src->good_path = ft_command_path(src, i);
@@ -53,7 +55,6 @@ void	ft_last_child(t_info *src, int i)
 		close_and_exit(src, 2);
 	dup2(fd_file, STDOUT_FILENO);
 	close(fd_file);
-	close(src->fd[READ_FD]);
 	ft_callexecve(src);
 }
 
