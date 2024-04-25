@@ -6,7 +6,7 @@
 /*   By: ocussy <ocussy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/13 09:21:53 by ocussy            #+#    #+#             */
-/*   Updated: 2024/04/23 17:50:02 by ocussy           ###   ########.fr       */
+/*   Updated: 2024/04/25 09:42:33 by ocussy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 void	ft_first_child(t_info *src, int i)
 {
-	close(src->fd[READ_FD]);
 	src->open_file = open(src->infile, O_RDONLY);
 	if (src->is_heredoc == 1)
 		unlink("heredoc.txt");
